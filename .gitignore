@@ -1,0 +1,12 @@
+data/
+outputs/
+backups/
+.runtime/
+.venv/
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+*.bak
+.DS_Store
+.env
+.env.*
