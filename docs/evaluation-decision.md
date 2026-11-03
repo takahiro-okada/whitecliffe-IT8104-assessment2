@@ -1,7 +1,13 @@
-# Evaluation decision / 評価方法の決定
+# Evaluation methodology
 
-The existing assessment train.csv and test.csv remain the inputs. All 5,681 supplied-test Sales labels are missing. Use grouped internal validation from labelled train.csv for MAE/MSE/RMSE/R², then refit on all eligible labels and predict supplied test.csv. Do not claim supplied-test accuracy or lecturer approval. No additional SalesDataSet is used.
+The supplied train.csv contains observed Sales values. All 5,681 records in test.csv have missing Sales values, so supervised evaluation metrics cannot be calculated on that file.
 
-2026年11月3日：追加のSalesDataSetは対象外とし、配布test.csvがラベルなしであることを明示して執筆を進める。講師確認待ちで作業を止めない。内部validationの評価と、提供testへの予測を一貫して区別する。
+Performance is evaluated using an internal holdout from the labelled training file. After the documented target-quality screening and duplicate removal, 8,532 eligible records are divided by unique item–store groups in an 80/20 ratio, producing 6,826 training records and 1,706 validation records. Repeated versions of an item–store pair remain within the same partition.
 
-The implemented pipeline already follows this design. This is a documentation decision; no data, model parameters or measured scores changed. The report draft is stored locally in report/02_evaluation_strategy.md.
+Preprocessing is fitted only on the training subset or the training fold during grouped cross-validation. Linear Regression, Random Forest and Gradient Boosting are compared using MAE, MSE, RMSE and R². Model selection uses training-side cross-validation; the internal holdout provides the reported validation scores.
+
+After evaluation, the selected pipeline is refitted on all eligible labelled records and used to predict test.csv. These outputs are predictions with unknown test accuracy. Full-data exploratory analysis informed the preprocessing decisions, so internal validation is treated as a developmental performance estimate rather than an independent confirmatory test.
+
+## 日本語要約
+
+提供test.csvには正解Salesがないため、train.csvを商品×店舗の組ごとに分割して性能を評価します。補完・標準化・カテゴリ変換は学習側のみから求め、モデル選択後に全対象ラベルで再学習してtest.csvを予測します。内部検証の評価値と、正解のないtest.csvへの予測は区別します。
