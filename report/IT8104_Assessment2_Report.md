@@ -4,7 +4,7 @@ Product price and store context provide useful information for predicting Sales,
 
 Gradient Boosting achieved the lowest internal validation error among three regression models, with MAE 756.03, RMSE 1,078.02 and R² 0.5963. Training-only cross-validation also selected this model. Store-level statistical comparisons did not establish a significant difference between the three candidates. The supplied test file had no observed Sales labels, so its 5,681 predictions have unknown accuracy.
 
-Google Analytics 4 recorded eight controlled Kiwi Outdoor purchases on 3 November 2026, comprising 11 items and NZ$377 simulated revenue. Processed reports matched the order records. The purchase funnel contained only one user, preventing meaningful customer conversion analysis. The recommended priorities are source-data verification, cautious use of predictions for planning reviews, and collection of genuine web behaviour before changing sales strategy.
+Google Analytics 4 recorded eight controlled Kiwi Outdoor purchases on 3 November 2026, comprising 11 items and NZ$377 simulated revenue. Processed reports matched the order records, but the one-user funnel could not describe customer conversion. A separate automated run on 4 November completed 30 synthetic scenarios and 11 demo purchases worth NZ$1,117. Purchase payloads matched outbound requests, but GA4 reporting remained unconfirmed. These tests support measurement review rather than claims about customer demand. Priorities are source-data verification, cautious forecast review and genuine web-data collection.
 
 # 1 Business Context and Data
 
@@ -12,7 +12,7 @@ This report examines how retail analysis and web analytics can support sales dec
 
 The supplied train.csv contains 8,540 rows and 14 columns, representing 1,562 item IDs and ten stores. Predictors describe Weight, Fat, Visibility, Category, Price, Security, StoreCode, OperationYear, Size, Area and Type. No is a sequence number; ID identifies an item. The accompanying README defines Sales as an item-at-store performance measure but specifies neither its units nor its observation period. Currency, quantities sold, returns, promotion dates and margins are unavailable. Retail Sales is therefore expressed in dataset units and is not automatically interpreted as monetary revenue or physical demand.
 
-The supplied test.csv contains 5,681 rows with the same schema, but every Sales value is missing. It supports prediction, not direct supervised scoring. Kiwi Outdoor is a separate five-product demonstration website linked to a dedicated GA4 property. Its purchases are simulated and involve no payment or delivery. Retail records and website events describe different observations and cannot be joined as common transactions. All retail calculations and graphics were produced in Python; GA4 supplied the processed web metrics.
+The supplied test.csv contains 5,681 rows with the same schema, but every Sales value is missing. It supports prediction, not direct supervised scoring. Kiwi Outdoor is a separate five-product demonstration website linked to a dedicated GA4 property. Its purchases are simulated and involve no payment or delivery. Retail records and website events describe different observations and cannot be joined as common transactions. All retail calculations and graphics were produced in Python. Web evidence comprises verified GA4 reports for 3 November and separately checked browser records for the additional simulation on 4 November.
 
 # 2 Exploratory Analysis and Preprocessing
 
@@ -162,11 +162,31 @@ Additional workflows stopped after viewing, removed a cart item, or reached chec
  | Begin checkout | 1 | Desktop | 
  | Purchase | 1 | Desktop | 
 
-## 4.4 Business Interpretation and Further Collection
+## 4.4 Additional Controlled Shopping Scenarios
 
-The strongest supported web finding is measurement consistency: the storefront's completed orders reached GA4 with matching identifiers, quantities and values, and appeared in processed reporting. This supports using the instrumentation for a subsequent behavioural study. The local event log retains only 100 events, so snapshots are partial windows and cannot be summed into a complete event census. GA4 screenshots and reconciled order totals provide the relevant reporting evidence.
+On 4 November 2026, 30 automated shopping scenarios were executed against Kiwi Outdoor using a separate browser context for each scenario. A seeded pseudorandom generator selected the browsing order, one to five products to view, basket quantities of one to three per selected product, and one of four stopping stages with equal probability. Products added to a basket were drawn from those viewed. Each context had a different observed GA4 client identifier. These identifiers represent isolated test environments, not independently recruited people. Entry links used simulation/test source and medium values with a dedicated campaign, and application events retained the simulated_transaction marker.
 
-With genuine traffic, a product receiving substantial views but few cart additions would justify investigating information, value or audience fit. Loss between checkout and purchase would justify examining usability and unexpected charges. These are conditional investigation paths, not established problems in this exercise. Collect a longer observation period, clearly identify legitimate users and sessions, and verify event definitions before comparing product, channel or device segments. Further scripted orders would expand a demonstration without resolving the absence of independently observed customer behaviour.
+Table 7 records the realised stopping stages. The 11 completed demo orders contained 33 units and NZ$1,117 simulated revenue, giving an average order value of NZ$101.55. Travel Mug accounted for 13 units and NZ$377, Hoodie seven units and NZ$455, Tote Bag ten units and NZ$200, Hiking Bottle two units and NZ$50, and NZ T-Shirt one unit and NZ$35. These quantities follow the generated baskets and do not establish product popularity.
+
+Table 7. Scripted stopping stages for 30 synthetic scenarios
+
+| Final stage | Scenarios | Meaning |
+|---|---:|---|
+| Product browsing only | 7 | No cart addition |
+| Cart exit | 7 | No checkout |
+| Checkout exit | 5 | No purchase |
+| Purchase completed | 11 | Demo receipt created |
+| Total | 30 | Synthetic scenarios |
+
+The local event records showed 30 scenarios reaching product viewing, 23 adding to cart, 16 beginning checkout and 11 purchasing. The resulting 36.7% purchase completion proportion describes this generated sample. Cart and checkout exits were assigned by the script, so they do not estimate natural abandonment or reveal usability problems. Neither the 30 browser identities nor the differing product choices provide evidence of a larger customer population.
+
+All 11 unique purchase identifiers and their values matched outbound Google Analytics collection payloads, and the captured collection responses returned HTTP 204. However, Realtime showed zero active users and no events at the post-run check and refresh. Inclusion in GA4 reports therefore remained unconfirmed. The local logs contained 79 view_item events, compared with 47 observed in outbound capture; successful transport of purchases does not establish delivery of every browsing event. The cause of this discrepancy was not established. The new run is reported separately from the verified 3 November metrics until GA4 totals can be reconciled.
+
+## 4.5 Business Interpretation and Further Collection
+
+The strongest supported web finding is measurement consistency for the eight orders on 3 November: completed orders reached GA4 with matching identifiers, quantities and values, and appeared in processed reporting. The later simulation does not yet extend this finding because its report inclusion remains unconfirmed. Local logs retain only 100 events per session, so snapshots cannot automatically be summed into a complete event census. The 30-context simulation stayed below that limit within each context, but its local totals still differed from captured outbound events. Reporting claims require separate reconciliation.
+
+With genuine traffic, a product receiving substantial views but few cart additions would justify investigating information, value or audience fit. Loss between checkout and purchase would justify examining usability and unexpected charges. These are conditional investigation paths, not established problems in either simulation. The assigned exits test the event sequence; they do not reveal why customers leave. Collect a longer observation period, verify event delivery and establish user and session definitions before comparing product, channel or device segments. Additional synthetic identifiers do not resolve the absence of independently observed customer behaviour.
 
 # 5 Integrated Recommendations and Limitations
 
@@ -176,11 +196,11 @@ First, verify the quarantined targets and inconsistent store attributes with the
 
 Third, retain the verified GA4 event design and collect genuine behavioural evidence before recommending website sales changes. Report product quantities and revenue separately, and state funnel eligibility and denominators. A business can then investigate stages with repeatable losses using user research or a controlled experiment. Review decisions against subsequent outcomes rather than assuming that the current descriptive associations will persist.
 
-Important uncertainties remain. The primary retail results exclude unverified targets and contain imputed attributes. Full-data EDA influenced rules, the holdout is a single development split, and temporal generalisation cannot be tested without dates. Store-level statistical comparisons have few dependent blocks. Web evidence consists of simulated transactions from one user, providing no population-level demand or conversion estimate. Neither part estimates causal effects, prediction intervals or profit. These limitations define the scope of the recommendations rather than invalidating the documented measurement and prediction exercise.
+Important uncertainties remain. The primary retail results exclude unverified targets and contain imputed attributes. Full-data EDA influenced rules, the holdout is a single development split, and temporal generalisation cannot be tested without dates. Store-level statistical comparisons have few dependent blocks. The verified web reports concern one user; the additional run uses 30 synthetic browser identities rather than 30 human participants and has unconfirmed GA4 inclusion. Neither run estimates population demand or conversion. Neither part estimates causal effects, prediction intervals or profit. These limitations define the scope of the recommendations.
 
 # 6 Conclusion
 
-The retail investigation identified substantial quality issues and meaningful associations involving Price and store context. Gradient Boosting offered the best observed internal validation performance, but statistical comparisons did not establish superiority and the unlabelled supplied test file prevented direct test scoring. GA4 demonstrated consistent ecommerce collection and reporting for eight simulated orders, while its single-user funnel exposed the limits of interpreting scripted activity as customer behaviour. Business decisions should therefore begin with data verification, contextual forecast review and genuine web-data collection, using the present results as evidence for focused investigation rather than guaranteed sales improvements.
+The retail investigation identified substantial quality issues and meaningful associations involving Price and store context. Gradient Boosting offered the best observed internal validation performance, but statistical comparisons did not establish superiority and the unlabelled supplied test file prevented direct test scoring. GA4 demonstrated consistent reporting for eight simulated orders. A further 30 synthetic scenarios broadened testing to browsing and checkout exits, but their GA4 reporting remained unconfirmed. Both exercises show why scripted activity cannot establish customer behaviour. Business decisions should begin with data verification, contextual forecast review and genuine web-data collection.
 
 # References
 
